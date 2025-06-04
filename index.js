@@ -28,7 +28,8 @@ async function fetchAndRenderUsers() {
 
     const usersList = document.createElement("div");
     usersList.style = `
-      width: 50%;
+      width: 100%;
+      max-width: 600px;
       margin: auto;
       display: flex;
       flex-direction: column;
