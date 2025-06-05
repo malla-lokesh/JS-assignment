@@ -1,129 +1,164 @@
-document.addEventListener("DOMContentLoaded", () => {
-  createHeading();
-  fetchAndRenderUsers();
-});
+(function () {
+  const USERS_API_URL = "https://dummyjson.com/users";
+  const CONTAINER_CLASS = "user-list-container";
 
-function createHeading() {
-  const heading = document.createElement("h1");
-  heading.innerText = "Users";
-  heading.style = `
-    text-align: center;
-    margin: 40px 0;
-    font-size: 24px;
-    color: #333;
-    font-family: Arial, sans-serif;
-  `;
+  function init() {
+    createHeading();
+    fetchAndRenderUsers();
+  }
 
-  document.body.appendChild(heading);
-}
+  function createHeading() {
+    const heading = document.createElement("h1");
+    heading.innerText = "Users";
+    heading.setAttribute(
+      "style",
+      `
+      text-align: center;
+      margin: 40px 0;
+      font-size: 24px;
+      color: #333;
+      font-family: Arial, sans-serif;
+    `
+    );
+    document.body.appendChild(heading);
+  }
 
-async function fetchAndRenderUsers() {
-  try {
-    const response = await fetch("https://dummyjson.com/users")
-      .then((res) => res.json())
-      .catch((error) => {
-        throw new Error(error);
+  async function fetchAndRenderUsers() {
+    try {
+      const res = await fetch(USERS_API_URL);
+      const data = await res.json();
+      const users = data.users;
+
+      const container = document.createElement("div");
+      container.className = CONTAINER_CLASS;
+      container.setAttribute(
+        "style",
+        `
+        width: 100%;
+        max-width: 600px;
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      `
+      );
+
+      users.forEach((user) => {
+        const card = createUserCard(user);
+        container.appendChild(card);
       });
-    const users = response.users;
 
-    const usersList = document.createElement("div");
-    usersList.style = `
-      width: 100%;
-      max-width: 600px;
-      margin: auto;
+      document.body.appendChild(container);
+    } catch (err) {
+      showError("Failed to load users. Please try again later.");
+    }
+  }
+
+  function createUserCard(user) {
+    const card = document.createElement("div");
+    card.setAttribute(
+      "style",
+      `
+      padding: 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #f9f9f9;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    `
+    );
+
+    const imageNameContainer = document.createElement("div");
+    imageNameContainer.setAttribute(
+      "style",
+      `
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    `
+    );
+
+    const image = document.createElement("img");
+    image.src = user.image;
+    image.setAttribute(
+      "style",
+      `
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+    `
+    );
+
+    const details = document.createElement("div");
+    details.setAttribute(
+      "style",
+      `
       display: flex;
       flex-direction: column;
-      gap: 8px;
-    `;
+      gap: 2px;
+    `
+    );
 
-    users.forEach((user) => {
-      const userCard = createUserCard(user);
-      usersList.appendChild(userCard);
-    });
+    const name = document.createElement("span");
+    name.innerText = `${user.firstName} ${user.lastName}`;
+    name.style.fontSize = "18px";
 
-    document.body.appendChild(usersList);
-  } catch (error) {
-    showErrorMessage("Failed to load users. Please try again later.");
+    const email = document.createElement("span");
+    email.innerText = user.email;
+    email.setAttribute(
+      "style",
+      `
+      color: lightslategray;
+      font-size: 14px;
+    `
+    );
+
+    details.appendChild(name);
+    details.appendChild(email);
+    imageNameContainer.appendChild(image);
+    imageNameContainer.appendChild(details);
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.innerText = "Delete";
+    deleteBtn.setAttribute(
+      "style",
+      `
+      background-color: #e62c2c;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      cursor: pointer;
+      border-radius: 6px;
+    `
+    );
+    deleteBtn.addEventListener("click", () => card.remove());
+
+    card.appendChild(imageNameContainer);
+    card.appendChild(deleteBtn);
+
+    return card;
   }
-}
 
-function createUserCard(user) {
-  const card = document.createElement("div");
-  card.style = `
-    padding: 16px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: #f9f9f9;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  `;
+  function showError(message) {
+    const error = document.createElement("p");
+    error.innerText = message;
+    error.setAttribute(
+      "style",
+      `
+      color: red;
+      text-align: center;
+      margin-top: 20px;
+      font-family: Arial, sans-serif;
+    `
+    );
+    document.body.appendChild(error);
+  }
 
-  const imageNameContainer = document.createElement("div");
-  imageNameContainer.style = `
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  `;
-
-  const image = document.createElement("img");
-  image.src = user.image;
-  image.style = `
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    object-fit: cover;
-  `;
-
-  const details = document.createElement("div");
-  details.style = `
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  `;
-
-  const name = document.createElement("span");
-  name.innerText = `${user.firstName} ${user.lastName}`;
-  name.style.fontSize = "18px";
-
-  const email = document.createElement("span");
-  email.innerText = user.email;
-  email.style = `
-    color: lightslategray;
-    font-size: 14px;
-  `;
-
-  details.appendChild(name);
-  details.appendChild(email);
-  imageNameContainer.appendChild(image);
-  imageNameContainer.appendChild(details);
-
-  const deleteButton = document.createElement("button");
-  deleteButton.innerText = "Delete";
-  deleteButton.style = `
-    background-color: #e62c2c;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    cursor: pointer;
-    border-radius: 6px;
-  `;
-  deleteButton.addEventListener("click", () => card.remove());
-
-  card.appendChild(imageNameContainer);
-  card.appendChild(deleteButton);
-
-  return card;
-}
-
-function showErrorMessage(message) {
-  const errorMsg = document.createElement("p");
-  errorMsg.innerText = message;
-  errorMsg.style = `
-    color: red;
-    text-align: center;
-    margin-top: 20px;
-    font-family: Arial, sans-serif;
-  `;
-  document.body.appendChild(errorMsg);
-}
+  if (document.readyState !== "loading") {
+    init();
+  } else {
+    document.addEventListener("DOMContentLoaded", init);
+  }
+})();
